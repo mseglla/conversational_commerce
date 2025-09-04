@@ -1,4 +1,4 @@
-# main.py — Conversational commerce (ants) — PUBLIC DEMO (Render‑ready)
+# main.py — Conversational commerce (ants) — PUBLIC DEMO (Render-ready)
 # Serves frontend at "/" and static files at "/static". Stripe (test) optional.
 import os
 import time
@@ -137,7 +137,7 @@ def chat(body: ChatIn):
             return JSONResponse(bot)
         ctx["topic"] = topic
         bot = system_reply(
-            "Entesos. Vols **eliminar tota la colònia** o **una solució ràpida** per les que veus?",
+            "Entesos. Vols <b>eliminar tota la colònia</b> o <b>una solució ràpida</b> per les que veus?",
             choices=["Eliminar colònia", "Solució ràpida"]
         )
         bot["session_id"] = sid
@@ -153,14 +153,14 @@ def chat(body: ChatIn):
             ctx["preference"] = "colònia"
         else:
             bot = system_reply(
-                "Disculpa, prefereixes **eliminar la colònia** o una **solució ràpida**?",
+                "Disculpa, prefereixes <b>eliminar la colònia</b> o una <b>solució ràpida</b>?",
                 choices=["Eliminar colònia", "Solució ràpida"]
             )
             bot["session_id"] = sid
             state["history"].append({"role": "assistant", "content": bot["reply"]})
             return JSONResponse(bot)
 
-        bot = system_reply("Hi ha **nens o mascotes** a la zona on ho aplicaràs?", choices=["Sí", "No"])
+        bot = system_reply("Hi ha <b>nens o mascotes</b> a la zona on ho aplicaràs?", choices=["Sí", "No"])
         bot["session_id"] = sid
         state["history"].append({"role": "assistant", "content": bot["reply"]})
         return JSONResponse(bot)
@@ -173,7 +173,7 @@ def chat(body: ChatIn):
         elif "no" in msg:
             ctx["kids_pets"] = False
         else:
-            bot = system_reply("Per seguretat, confirma: **Hi ha nens o mascotes a prop?**", choices=["Sí", "No"])
+            bot = system_reply("Per seguretat, confirma: <b>Hi ha nens o mascotes a prop?</b>", choices=["Sí", "No"])
             bot["session_id"] = sid
             state["history"].append({"role": "assistant", "content": bot["reply"]})
             return JSONResponse(bot)
@@ -181,11 +181,11 @@ def chat(body: ChatIn):
         product = pick_recommendation(ctx["preference"], ctx["kids_pets"])
         ctx["selected_product_id"] = product["id"]
         text = (
-            f"Et recomano **{product['name']}** — {product['price_eur']:.2f} €.\n"
-            f"Pros: " + ", ".join(product["pros"]) + ". "
-            f"Contres: " + ", ".join(product["cons"]) + ".\n"
-            f"Nota: {product['kids_pets_note']}\n\n"
-            "Vols que et compari amb una alternativa o **compres aquest**?"
+            f"Et recomano <b>{product['name']}</b> — {product['price_eur']:.2f} €.<br>"
+            f"<b>Pros</b>: " + ", ".join(product["pros"]) + ".<br>"
+            f"<b>Contres</b>: " + ", ".join(product["cons"]) + ".<br>"
+            f"<b>Nota</b>: {product['kids_pets_note']}<br><br>"
+            "Vols que et <b>compari</b> amb una alternativa o <b>compres aquest</b>?"
         )
         bot = system_reply(text, choices=["Comparar", "Comprar"])
         bot["session_id"] = sid
@@ -215,10 +215,10 @@ def chat(body: ChatIn):
         ctx["compare_alt_id"] = alt["id"]
 
         text = (
-            f"Comparativa ràpida:\n"
-            f"- **{cur['name']}** ({cur['price_eur']:.2f} €): " + ", ".join(cur["pros"]) + ".\n"
-            f"- **{alt['name']}** ({alt['price_eur']:.2f} €): " + ", ".join(alt["pros"]) + ".\n\n"
-            f"Quin prefereixes? (respon amb **1** pel primer o **2** pel segon)"
+            "Comparativa ràpida:<br>"
+            f"- <b>{cur['name']}</b> ({cur['price_eur']:.2f} €): " + ", ".join(cur["pros"]) + ".<br>"
+            f"- <b>{alt['name']}</b> ({alt['price_eur']:.2f} €): " + ", ".join(alt["pros"]) + ".<br><br>"
+            "Quin prefereixes? (respon amb <b>1</b> pel primer o <b>2</b> pel segon)"
         )
         bot = system_reply(text, choices=["1", "2"])
         bot["session_id"] = sid
@@ -231,7 +231,7 @@ def chat(body: ChatIn):
         if not current_id or not alt_id:
             ctx["mode"] = None
             ctx["compare_alt_id"] = None
-            bot = system_reply("Sembla que s'ha perdut el context. Vols **comparar** de nou o **comprar** directament?")
+            bot = system_reply("Sembla que s'ha perdut el context. Vols <b>comparar</b> de nou o <b>comprar</b> directament?")
             bot["session_id"] = sid
             return JSONResponse(bot)
 
@@ -241,7 +241,7 @@ def chat(body: ChatIn):
         ctx["mode"] = None
         ctx["compare_alt_id"] = None
 
-        text = f"Perfecte. Has seleccionat **{chosen['name']}** ({chosen['price_eur']:.2f} €).\nQuantes unitats vols?"
+        text = f"Perfecte. Has seleccionat <b>{chosen['name']}</b> ({chosen['price_eur']:.2f} €).<br>Quantes unitats vols?"
         bot = system_reply(text)
         bot["session_id"] = sid
         state["history"].append({"role": "assistant", "content": bot["reply"]})
@@ -254,35 +254,63 @@ def chat(body: ChatIn):
             bot["session_id"] = sid
             return JSONResponse(bot)
         product = next(p for p in CATALOG if p["id"] == ctx["selected_product_id"])
-        text = f"Perfecte. Has seleccionat **{product['name']}** ({product['price_eur']:.2f} €).\nQuantes unitats vols?"
+        text = f"Perfecte. Has seleccionat <b>{product['name']}</b> ({product['price_eur']:.2f} €).<br>Quantes unitats vols?"
         bot = system_reply(text)
         bot["session_id"] = sid
         state["history"].append({"role": "assistant", "content": bot["reply"]})
         return JSONResponse(bot)
 
-    # 5) QUANTITAT (si no comparem)
+    # 5) QUANTITAT / ADREÇA / FRANJA (si no comparem)
     if ctx["selected_product_id"] and ctx.get("mode") != "comparing":
+        # Últim missatge de l'assistent (per saber què ens havia demanat)
+        last_assistant_text = ""
+        for h in reversed(state["history"]):
+            if h["role"] == "assistant":
+                last_assistant_text = h["content"].lower()
+                break
+
         digits = ''.join(ch for ch in msg if ch.isdigit())
+
+        # --- PRIORITZA ADREÇA quan l'assistent l'acaba de demanar,
+        #     encara que el text contingui números (p. ex. "C/ Indústria 12")
+        if ctx["address"] is None and "adreça d'entrega" in last_assistant_text:
+            ctx["address"] = user_msg
+            slots_text = "<br>".join(f"{i+1}) {s}" for i, s in enumerate(DELIVERY_SLOTS))
+            bot = system_reply(
+                f"Perfecte. Adreça: <b>{ctx['address']}</b><br>"
+                f"Tria <b>franja d’entrega</b>:<br>{slots_text}<br>"
+                f"(Respon amb 1-{len(DELIVERY_SLOTS)})"
+            )
+            bot["session_id"] = sid
+            state["history"].append({"role": "assistant", "content": bot["reply"]})
+            return JSONResponse(bot)
+
+        # --- QUANTITAT (només abans d'haver demanat l'adreça)
         if digits and ctx["address"] is None:
             qty = max(1, int(digits))
             ctx["quantity"] = qty
             product = next(p for p in CATALOG if p["id"] == ctx["selected_product_id"])
             total = qty * product["price_eur"]
             text = (
-                f"Resum parcial: **{qty} × {product['name']}** — Subtotal: {total:.2f} €.\n"
-                "Escriu **l'adreça d'entrega** (ex: 'C/ Indústria 12, Granollers')."
+                f"Resum parcial:<br>"
+                f"- Producte: <b>{product['name']}</b><br>"
+                f"- Quantitat: <b>{qty}</b><br>"
+                f"- Subtotal: <b>{total:.2f} €</b><br><br>"
+                "Escriu <b>l'adreça d'entrega</b> (ex: 'C/ Indústria 12, Granollers')."
             )
             bot = system_reply(text)
             bot["session_id"] = sid
             state["history"].append({"role": "assistant", "content": bot["reply"]})
             return JSONResponse(bot)
 
-        # 6) ADREÇA
+        # 6) ADREÇA (entrada lliure, si encara no s'ha demanat explícitament)
         if ctx["address"] is None and len(user_msg) >= 6 and not digits:
             ctx["address"] = user_msg
-            slots_text = "\n".join(f"{i+1}) {s}" for i, s in enumerate(DELIVERY_SLOTS))
+            slots_text = "<br>".join(f"{i+1}) {s}" for i, s in enumerate(DELIVERY_SLOTS))
             bot = system_reply(
-                f"Perfecte. Adreça: **{ctx['address']}**\nTria **franja d’entrega**:\n{slots_text}\n(Respon amb 1-{len(DELIVERY_SLOTS)})"
+                f"Perfecte. Adreça: <b>{ctx['address']}</b><br>"
+                f"Tria <b>franja d’entrega</b>:<br>{slots_text}<br>"
+                f"(Respon amb 1-{len(DELIVERY_SLOTS)})"
             )
             bot["session_id"] = sid
             state["history"].append({"role": "assistant", "content": bot["reply"]})
@@ -296,13 +324,13 @@ def chat(body: ChatIn):
                 product = next(p for p in CATALOG if p["id"] == ctx["selected_product_id"])
                 total = ctx["quantity"] * product["price_eur"]
                 text = (
-                    f"Resum:\n"
-                    f"- Producte: **{product['name']}**\n"
-                    f"- Quantitat: **{ctx['quantity']}**\n"
-                    f"- Adreça: **{ctx['address']}**\n"
-                    f"- Franja: **{ctx['delivery_slot']}**\n"
-                    f"- Total estimat: **{total:.2f} €**\n\n"
-                    "Vols **pagar ara** o **canviar** alguna cosa?"
+                    f"Resum:<br>"
+                    f"- Producte: <b>{product['name']}</b><br>"
+                    f"- Quantitat: <b>{ctx['quantity']}</b><br>"
+                    f"- Adreça: <b>{ctx['address']}</b><br>"
+                    f"- Franja: <b>{ctx['delivery_slot']}</b><br>"
+                    f"- Total estimat: <b>{total:.2f} €</b><br><br>"
+                    "Vols <b>pagar ara</b> o <b>canviar</b> alguna cosa?"
                 )
                 bot = system_reply(text, choices=["Pagar ara", "Canviar"])
                 bot["session_id"] = sid
@@ -310,7 +338,7 @@ def chat(body: ChatIn):
                 state["history"].append({"role": "assistant", "content": bot["reply"]})
                 return JSONResponse(bot)
             else:
-                bot = system_reply(f"Si us plau, tria un número entre 1 i {len(DELIVERY_SLOTS)}.")
+                bot = system_reply(f"Si us plau, tria un número entre <b>1</b> i <b>{len(DELIVERY_SLOTS)}</b>.")
                 bot["session_id"] = sid
                 return JSONResponse(bot)
 
@@ -364,13 +392,15 @@ def chat(body: ChatIn):
                 "quantity": 1, "mode": None, "compare_alt_id": None,
                 "address": None, "delivery_slot": None
             })
-            bot = system_reply("Cap problema! Tornem a començar. Vols **eliminar colònia** o **solució ràpida**?",
-                               choices=["Eliminar colònia", "Solució ràpida"])
+            bot = system_reply(
+                "Cap problema! Tornem a començar. Vols <b>eliminar colònia</b> o <b>solució ràpida</b>?",
+                choices=["Eliminar colònia", "Solució ràpida"]
+            )
             bot["session_id"] = sid
             return JSONResponse(bot)
 
     # Fallback
-    bot = system_reply("Perdona, no t'he entès. Pots repetir-ho o escriure **ajuda**?")
+    bot = system_reply("Perdona, no t'he entès. Pots repetir-ho o escriure <b>ajuda</b>?")
     bot["session_id"] = sid
     state["history"].append({"role": "assistant", "content": bot["reply"]})
     return JSONResponse(bot)
